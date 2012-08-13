@@ -1,0 +1,36 @@
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#board {
+    border: 1px solid black;
+    display: inline-block;
+}
+
+.white {
+    background-color: #E7F1FA;
+    border: 1px solid #E7F1FA;
+}
+
+.black {
+    background-color: #A2BDD9;
+    border: 1px solid #A2BDD9;
+}
+
+.square {
+    cursor: move;
+    display: inline-block;
+    font-size: 32px;
+    height: 32px;
+    line-height: 100%;
+    text-align: center;
+    width: 32px;
+    vertical-align: middle;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .square {
+        line-height:normal;
+    }
+}
