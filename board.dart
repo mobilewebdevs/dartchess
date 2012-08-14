@@ -164,7 +164,9 @@ class Board {
       }
     } else {
       
-      if( _validMoves[_selectedSquare].some((String e) => e == square)) {
+      if( _validMoves[_selectedSquare] != null &&
+          _validMoves[_selectedSquare].some((String e) => e == square))
+      {
         setSquare(_selectedSquare, EMPTY_SQUARE);
         setSquare(square, _selectedPiece);
 
