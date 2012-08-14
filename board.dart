@@ -167,7 +167,7 @@ class Board {
       if( _validMoves[_selectedSquare] != null &&
           _validMoves[_selectedSquare].some((String e) => e == square))
       {
-        _makeCastleMove(_selectedSquare, square, getPiece(_selectedSquare));
+        _makeSpecialMove(_selectedSquare, square, getPiece(_selectedSquare));
         _makeMove(_selectedSquare, square, _selectedPiece);
         _engine.makeMove(_fen.fen, makeBestmove);
       }
@@ -180,7 +180,39 @@ class Board {
     }
   }
   
-  _makeCastleMove(String from_square, String to_square, String piece) {
+  _makeSpecialMove(String from_square, String to_square, String piece) {
+    String captured_piece = getPiece(to_square);
+    
+    _fen.incrementHalfMoveClock();
+    
+    if( captured_piece != EMPTY_SQUARE ) {
+      _fen.resetHalfMoveClock();
+      
+      if( captured_piece == Board.WHITE_ROOK ) {
+        if( to_square == "h1" )      _fen.removeCastlingRights("K");
+        else if( to_square == "a1" ) _fen.removeCastlingRights("Q");
+      } 
+      
+      else if( captured_piece == Board.BLACK_ROOK ) {
+        if( to_square == "h8" )     _fen.removeCastlingRights("k");
+        else if( to_square == "a8") _fen.removeCastlingRights("q");
+      }  
+    }
+    
+    else if( to_square == _fen.enPassant ) {
+      if( piece == WHITE_PAWN ) {
+        int rank = Math.parseInt(_fen.enPassant[1]) - 1;
+        setSquare("${to_square[0]}${rank.toString()}", EMPTY_SQUARE);
+        _fen.resetHalfMoveClock();
+      }
+      
+      else if( piece == BLACK_PAWN ) {
+        int rank = Math.parseInt(_fen.enPassant[1]) + 1;
+        setSquare("${to_square[0]}${rank.toString()}", EMPTY_SQUARE);
+        _fen.resetHalfMoveClock();
+      }
+    }
+    
     if( piece == WHITE_KING || piece == BLACK_KING ) {
       int f1 = getFile(from_square);
       int f2 = getFile(to_square);
@@ -219,6 +251,31 @@ class Board {
       _fen.removeCastlingRights("k");
     if( piece == BLACK_ROOK && from_square == "a8" )
       _fen.removeCastlingRights("q");
+
+    if( piece == WHITE_PAWN || piece == BLACK_PAWN ) {
+      int r1 = getRank(from_square);
+      int r2 = getRank(to_square);
+
+      if( (r1 - r2).abs() == 2 ) {
+        String ep;
+
+        if( piece == WHITE_PAWN ) {
+          r1++;
+          ep = "${from_square[0]}${r1.toString()}";
+        } else {
+          r1--;
+          ep = "${from_square[0]}${r1.toString()}";
+        }
+        
+        _fen.enPassant = ep;
+      } else {
+        _fen.enPassant = "-";
+      }
+      
+      _fen.resetHalfMoveClock();
+    } else {
+      _fen.enPassant = "-";
+    }
   }
   
   _makeMove(String from_square, String to_square, String piece) {
@@ -229,6 +286,9 @@ class Board {
     
     _fen.toggleColor();
     _fen.buildFromPosition(this);
+    
+    if( _fen.colorToMove == WHITE )
+      _fen.incrementFullMoveClock();
   }
 
   makeBestmove(String bestmove, String ponder) {
@@ -236,7 +296,7 @@ class Board {
     String to_square = bestmove.substring(2, 4);
     String piece = getPiece(from_square);
     
-    _makeCastleMove(from_square, to_square, piece);
+    _makeSpecialMove(from_square, to_square, piece);
     _makeMove(from_square, to_square, piece);
     _engine.getValidMoves(_fen.fen, _run);
   }

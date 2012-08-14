@@ -9,7 +9,7 @@ class Fen {
     _regexp = new RegExp(@"^([KkQqRrNnBbPp1-8]{1,8})\/([KkQqRrNnBbPp1-8]{1,8})\/"
         @"([KkQqRrNnBbPp1-8]{1,8})\/([KkQqRrNnBbPp1-8]{1,8})\/([KkQqRrNnBbPp1-8]{1,8})\/"
         @"([KkQqRrNnBbPp1-8]{1,8})\/([KkQqRrNnBbPp1-8]{1,8})\/([KkQqRrNnBbPp1-8]{1,8})"
-        @"\s([bw])\s([-KkQq]{1,4})\s([-abcdefgh1-8]{1,2})\s(\d)*\s(\d*)$");
+        @"\s([bw])\s([-KkQq]{1,4})\s([-abcdefgh36]{1,2})\s(\d*)\s(\d*)$");
 
     // Mapping between FEN codes and board pieces.
     _fen2piece = {
@@ -99,6 +99,16 @@ class Fen {
     _parse();
   }
 
+  String get enPassant() => _match[11];
+  
+  set enPassant(String square) {
+    _fen = "${_match[1]}/${_match[2]}/${_match[3]}/${_match[4]}/"
+    "${_match[5]}/${_match[6]}/${_match[7]}/${_match[8]} "
+    "${_match[9]} ${_match[10]} ${square} ${_match[12]} ${_match[13]}";
+    
+    _parse();
+  }
+
   toggleColor() {
     String color = _match[9] == "w" ? "b" : "w";
     
@@ -106,6 +116,31 @@ class Fen {
       "${_match[5]}/${_match[6]}/${_match[7]}/${_match[8]} "
       "${color} ${_match[10]} ${_match[11]} ${_match[12]} ${_match[13]}";
       
+    _parse();
+  }
+  
+  _setHalfMoveClock(String half_move) {
+    _fen = "${_match[1]}/${_match[2]}/${_match[3]}/${_match[4]}/"
+    "${_match[5]}/${_match[6]}/${_match[7]}/${_match[8]} "
+    "${_match[9]} ${_match[10]} ${_match[11]} ${half_move} ${_match[13]}";
+    
+    _parse();    
+  }
+  
+  resetHalfMoveClock() => _setHalfMoveClock("0");
+  
+  incrementHalfMoveClock() {
+    int half_move = Math.parseInt(_match[12]) + 1;
+    _setHalfMoveClock(half_move.toString());
+  }
+  
+  incrementFullMoveClock() {
+    int full_move = Math.parseInt(_match[13]) + 1;
+    
+    _fen = "${_match[1]}/${_match[2]}/${_match[3]}/${_match[4]}/"
+    "${_match[5]}/${_match[6]}/${_match[7]}/${_match[8]} "
+    "${_match[9]} ${_match[10]} ${_match[11]} ${_match[12]} ${full_move.toString()}";
+    
     _parse();
   }
   
