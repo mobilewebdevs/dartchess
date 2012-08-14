@@ -16,6 +16,7 @@ class Dartchess {
   run(Map valid_moves) {
     _board.engine = _engine;
     _board.validMoves = valid_moves;
+    _engine.setThreads(8);
   }
 
   Board _board;

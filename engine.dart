@@ -25,6 +25,8 @@ class Engine {
     }
   }
   
+  setThreads(int num_threads) => _ws.send("setoption name threads value ${num_threads}");
+  
   makeMove(String fen, Function callback) {
     _mode = BEST_MOVE;
     _callback = callback;
