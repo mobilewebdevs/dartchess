@@ -186,6 +186,8 @@ class Board {
       int f2 = getFile(to_square);
       int piece_color = pieceColor(piece);
       
+      _fen.removeCastlingRights(piece_color == WHITE ? "KQ" : "kq");
+      
       // Castle King side.
       if( f1 == 5 && f2 == 7 ) {
         if( piece_color == WHITE ) {
@@ -207,7 +209,16 @@ class Board {
           setSquare("d8", BLACK_ROOK);
         }
       }
-    }    
+    }
+    
+    if( piece == WHITE_ROOK && from_square == "h1" )
+      _fen.removeCastlingRights("K");
+    if( piece == WHITE_ROOK && from_square == "a1" )
+      _fen.removeCastlingRights("Q");
+    if( piece == BLACK_ROOK && from_square == "h8" )
+      _fen.removeCastlingRights("k");
+    if( piece == BLACK_ROOK && from_square == "a8" )
+      _fen.removeCastlingRights("q");
   }
   
   _makeMove(String from_square, String to_square, String piece) {

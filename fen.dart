@@ -63,6 +63,42 @@ class Fen {
     return true;
   }
   
+  removeCastlingRights(String type) {
+    bool white_ks, white_qs, black_ks, black_qs;
+    String rights = _match[10];
+    
+    white_ks = white_qs = black_ks = black_qs = false;
+    
+    if( rights.contains("K") ) white_ks = true;
+    if( rights.contains("Q") ) white_qs = true;
+    if( rights.contains("k") ) black_ks = true;
+    if( rights.contains("q") ) black_qs = true;
+
+    switch( type ) {
+      case "K": white_ks = false; break;
+      case "Q": white_qs = false; break;
+      case "k": black_ks = false; break;
+      case "q": black_qs = false; break;
+      case "KQ": white_ks = white_qs = false; break;
+      case "kq": black_ks = black_qs = false; break;
+    }
+    
+    rights = "";
+    
+    if( white_ks ) rights = "${rights}K";
+    if( white_qs ) rights = "${rights}Q";
+    if( black_ks ) rights = "${rights}k";
+    if( black_qs ) rights = "${rights}q";
+    
+    if( rights.length == 0 ) rights = "-";
+
+    _fen = "${_match[1]}/${_match[2]}/${_match[3]}/${_match[4]}/"
+        "${_match[5]}/${_match[6]}/${_match[7]}/${_match[8]} "
+        "${_match[9]} ${rights} ${_match[11]} ${_match[12]} ${_match[13]}";
+    
+    _parse();
+  }
+
   toggleColor() {
     String color = _match[9] == "w" ? "b" : "w";
     
