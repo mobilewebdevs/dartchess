@@ -255,19 +255,10 @@ class Board {
     if( piece == WHITE_PAWN || piece == BLACK_PAWN ) {
       int r1 = getRank(from_square);
       int r2 = getRank(to_square);
-
+      
       if( (r1 - r2).abs() == 2 ) {
-        String ep;
-
-        if( piece == WHITE_PAWN ) {
-          r1++;
-          ep = "${from_square[0]}${r1.toString()}";
-        } else {
-          r1--;
-          ep = "${from_square[0]}${r1.toString()}";
-        }
-        
-        _fen.enPassant = ep;
+        r1 = ( piece == WHITE_PAWN ) ? r1 + 1 : r1 - 1;
+        _fen.enPassant = "${from_square[0]}${r1.toString()}";
       } else {
         _fen.enPassant = "-";
       }
