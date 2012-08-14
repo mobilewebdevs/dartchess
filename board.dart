@@ -73,10 +73,10 @@ class Board {
   setSquareByIndex(int x, int y, [String value = EMPTY_SQUARE]) =>
       setSquare("${"abcdefgh"[x]}${y.toString()}", value);
   
-  // Retrieve rank for a given square.
+  // Retrieve rank for a given square (1-8).
   int getRank(String square) => Math.parseInt(square[1]);
   
-  // Retrieve file for a given square.
+  // Retrieve file for a given square (a-h converted to int).
   int getFile(String square) => square.charCodeAt(0) - 96;
   
   int getSquareColor(String square) {
@@ -163,18 +163,12 @@ class Board {
         }
       }
     } else {
-      
+
       if( _validMoves[_selectedSquare] != null &&
           _validMoves[_selectedSquare].some((String e) => e == square))
       {
-        setSquare(_selectedSquare, EMPTY_SQUARE);
-        setSquare(square, _selectedPiece);
-
-        _moves.add(_fen.fen);
-        
-        _fen.toggleColor();
-        _fen.buildFromPosition(this);
-        
+        _makeCastleMove(_selectedSquare, square, getPiece(_selectedSquare));
+        _makeMove(_selectedSquare, square, _selectedPiece);
         _engine.makeMove(_fen.fen, makeBestmove);
       }
       
@@ -185,20 +179,54 @@ class Board {
       _selectedPiece = _selectedSquare = null;
     }
   }
-
-  makeBestmove(String bestmove, String ponder) {
-    String square_from = bestmove.substring(0, 2);
-    String square_to = bestmove.substring(2, 4);
-    String piece = getPiece(square_from);
-    
-    setSquare(square_from, EMPTY_SQUARE);
-    setSquare(square_to, piece);
+  
+  _makeCastleMove(String from_square, String to_square, String piece) {
+    if( piece == WHITE_KING || piece == BLACK_KING ) {
+      int f1 = getFile(from_square);
+      int f2 = getFile(to_square);
+      int piece_color = pieceColor(piece);
+      
+      // Castle King side.
+      if( f1 == 5 && f2 == 7 ) {
+        if( piece_color == WHITE ) {
+          setSquare("h1", EMPTY_SQUARE);
+          setSquare("f1", WHITE_ROOK);
+        } else {
+          setSquare("h8", EMPTY_SQUARE);
+          setSquare("f8", BLACK_ROOK);
+        }
+      }
+      
+      // Castle Queen side.
+      if( f1 == 5 && f2 == 3 ) {
+        if( piece_color == WHITE ) {
+          setSquare("a1", EMPTY_SQUARE);
+          setSquare("d1", WHITE_ROOK);
+        } else {
+          setSquare("a8", EMPTY_SQUARE);
+          setSquare("d8", BLACK_ROOK);
+        }
+      }
+    }    
+  }
+  
+  _makeMove(String from_square, String to_square, String piece) {
+    setSquare(from_square, EMPTY_SQUARE);
+    setSquare(to_square, piece);
     
     _moves.add(_fen.fen);
     
     _fen.toggleColor();
     _fen.buildFromPosition(this);
+  }
+
+  makeBestmove(String bestmove, String ponder) {
+    String from_square = bestmove.substring(0, 2);
+    String to_square = bestmove.substring(2, 4);
+    String piece = getPiece(from_square);
     
+    _makeCastleMove(from_square, to_square, piece);
+    _makeMove(from_square, to_square, piece);
     _engine.getValidMoves(_fen.fen, _run);
   }
   
